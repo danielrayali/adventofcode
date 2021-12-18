@@ -1,9 +1,9 @@
-programs = d1s1 d1s2
+programs = d1s1 d1s2 d2s1
 
 all: $(programs) gitignore
 
 $(programs): %: %.cc
-	g++ -std=c++17 -o $@ $<
+	clang++ -std=c++17 -o $@ $<
 
 gitignore:
 	echo $(programs) > .gitignore
