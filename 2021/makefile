@@ -1,4 +1,4 @@
-programs = d1s1 d1s2 d2s1
+programs = d1s1 d1s2 d2s1 d2s2
 
 all: $(programs) gitignore
 
