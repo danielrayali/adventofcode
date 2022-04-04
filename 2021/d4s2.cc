@@ -33,6 +33,11 @@ public:
     BingoBoard(const vector<vector<int>>& values) {
         board_ = values;
         marks_ = values;
+        has_bingo_ = false;
+    }
+
+    bool HasBingo() const {
+        return has_bingo_;
     }
 
     // Mark the value and return true if the board is a winner
@@ -74,6 +79,7 @@ public:
 private:
     vector<vector<int>> board_;
     vector<vector<int>> marks_;
+    mutable bool has_bingo_ = false;
 
     void Mark(const int value) {
         for (auto& row : marks_) {
@@ -89,14 +95,14 @@ private:
         // Check rows
         for (size_t i = 0; i < marks_.size(); ++i) {
             if (this->CheckRow(i)) {
-                return true;
+                return (has_bingo_ = true);
             }
         }
 
         // Check columns
         for (size_t i = 0; i < marks_.at(0).size(); ++i) {
             if (this->CheckColumn(i)) {
-                return true;
+                return (has_bingo_ = true);
             }
         }
 
@@ -151,16 +157,25 @@ int main(int argc, char* argv[]) {
     }
 
     bool bingo = false;
+    int count = 0;
     for (auto value : marks) {
-        for (auto& bingo_board : bingo_boards) {
-            cout << "Marking " << value << endl;
-            if (bingo_board.MarkAndCheck(value)) {
-                cout << "Bingo!" << endl;
-                cout << "Sum of unmarked values: " << bingo_board.SumUnmarked() << endl;
-                cout << "Product of the sum and the last marked value: " << bingo_board.SumUnmarked() * value << endl;
-                bingo_board.PrintMarks();
-                bingo = true;
-                break;
+        cout << "Mark: " << value << endl;
+        for (int i = 0; i < bingo_boards.size(); ++i) {
+            if (bingo_boards[i].HasBingo()) {
+                continue;
+            }
+            if (bingo_boards[i].MarkAndCheck(value)) {
+                count++;
+                cout << "A board found bingo: " << bingo_boards[i].HasBingo() << endl;
+                if (count == bingo_boards.size()) {
+                    cout << "The last board's bingo was found: " << i << endl;
+                    cout << "Marked " << value << endl;
+                    bingo_boards[i].PrintMarks();
+                    cout << "Sum of unmarked values: " << bingo_boards[i].SumUnmarked() << endl;
+                    cout << "Product of the sum and the last marked value: " << bingo_boards[i].SumUnmarked() * value << endl;
+                    bingo = true;
+                    break;
+                }
             }
         }
         if (bingo) {
