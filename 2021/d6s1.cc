@@ -31,11 +31,6 @@ int main(int argc, char* argv[]) {
 
     for (int i = 0; i < 80; ++i) {
         Cycle(values);
-        // cout << "After " << i << " days: ";
-        // for (int j = 0; j < values.size(); ++j) {
-        //     cout << values[j] << ",";
-        // }
-        // cout << endl;
     }
 
     cout << "Count: " << values.size() << endl;
