@@ -2,8 +2,8 @@ use std::fs::File;
 use std::io::BufRead;
 use std::io::BufReader;
 
-fn main() {
-    let f = File::open("input.txt").expect("Unable to open file");
+pub fn d1s2() {
+    let f = File::open("input/day1.txt").expect("Unable to open file");
     let reader = BufReader::new(f);
     let mut all_calories: Vec<i32> = Vec::new();
     let mut current_calories = 0;
