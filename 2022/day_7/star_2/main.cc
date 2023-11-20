@@ -49,6 +49,7 @@ public:
         }
     }
 
+    // Recursive, depth-first traversal of the directory tree
     void ProcessEachDir(const function<void(Directory*)>& user_function) {
         this->ProcessEachDirHelper(&root_, user_function);
     }
@@ -82,6 +83,8 @@ private:
     void AddFile(const string& name, const size_t size) {
         current_dir_ptr_->files.emplace_back(name, size);
         current_dir_ptr_->total_size += size;
+
+        // Update all upstream parents of a new file's size
         Directory* parent = current_dir_ptr_->parent;
         while (parent != nullptr) {
             parent->total_size += size;
