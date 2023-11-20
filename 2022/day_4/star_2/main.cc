@@ -15,20 +15,20 @@ vector<string> SplitString(const string& str, char delimiter) {
     return tokens;
 }
 
-// Only test if inner_* is contained within outter_*
-bool IsFullyContained(int outter_lower, int outter_higher, int inner_lower, int inner_higher) {
-    if (inner_lower < outter_lower || inner_lower > outter_higher) {
-        return false;
+// Tests whether right overlaps left
+bool HasOverlap(int left_lower, int left_higher, int right_lower, int right_higher) {
+    if (right_lower >= left_lower && right_lower <= left_higher) {
+        return true;
     }
 
-    if (inner_higher < outter_lower || inner_higher > outter_higher) {
-        return false;
+    if (right_higher >= left_lower && right_higher <= left_higher) {
+        return true;
     }
 
-    return true;
+    return false;
 }
 
-bool HasAFullyContainedRange(const string& line) {
+bool HasAnyOverlap(const string& line) {
     vector<string> pairs = SplitString(line, ',');
     vector<string> left_range = SplitString(pairs[0], '-');
     int left_low = atoi(left_range[0].c_str());
@@ -38,13 +38,11 @@ bool HasAFullyContainedRange(const string& line) {
     int right_low = atoi(right_range[0].c_str());
     int right_high = atoi(right_range[1].c_str());
 
-    // Test left outter
-    if (IsFullyContained(left_low, left_high, right_low, right_high)) {
+    if (HasOverlap(left_low, left_high, right_low, right_high)) {
         return true;
     }
 
-    // Test right outter
-    if (IsFullyContained(right_low, right_high, left_low, left_high)) {
+    if (HasOverlap(right_low, right_high, left_low, left_high)) {
         return true;
     }
 
@@ -63,7 +61,7 @@ int main(int argc, char* argv[]) {
     string line;
     int occurances = 0;
     while (getline(input, line)) {
-        if (HasAFullyContainedRange(line)) {
+        if (HasAnyOverlap(line)) {
             occurances += 1;
         }
     }
