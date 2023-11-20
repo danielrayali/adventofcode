@@ -22,7 +22,7 @@ vector<string> SplitString(const string& str, char delimiter) {
 // "[D] [V] [V]             [Q] [N] [C]"
 // "[P] [G] [R] [Z] [Z] [C] [Z] [G] [P]"
 void ParseStackLine(const string& line, vector<stack<char>>& stacks) {
-    // Make sure we have enough stacks. This won't affect existing stacks.
+    // Make sure we have enough stacks
     while (stacks.size() < ((line.size() + 1) / 4)) {
         stacks.push_back({});
     }
@@ -44,9 +44,15 @@ void ProcessMoveCommand(const string& command, vector<stack<char>>& stacks) {
     const int source = atoi(results[3].c_str()) - 1;
     const int dest = atoi(results[5].c_str()) - 1;
 
+    stack<char> buffer;
     for (int i = 0; i < num_to_move; ++i) {
-        stacks.at(dest).emplace(stacks.at(source).top());
+        buffer.emplace(stacks.at(source).top());
         stacks.at(source).pop();
+    }
+
+    while (!buffer.empty()) {
+        stacks.at(dest).emplace(buffer.top());
+        buffer.pop();
     }
 }
 
