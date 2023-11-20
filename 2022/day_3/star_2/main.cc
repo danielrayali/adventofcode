@@ -2,9 +2,16 @@
 #include <fstream>
 #include <set>
 #include <map>
-#include <sstream>
 
 using namespace std;
+
+inline int ConvertToPriority(const char letter) {
+    if (islower(letter)) {
+        return (letter - 'a' + 1);
+    } else {
+        return (letter - 'A' + 27);
+    }
+}
 
 int GetPriority(const string lines[3]) {
     // Reduce repeated letters into a single instance
@@ -15,25 +22,20 @@ int GetPriority(const string lines[3]) {
         }
     }
 
-    // Add all appearances of letters across each set, use the only one that will appear 3 times
+    // Add all appearances of letters across each set.
+    // Use the only one that will appear 3 times
     map<char, int> counts;
     char common_letter = 'a';
     for (int i = 0; i < 3; i++) {
         for (auto letter : letters[i]) {
             counts[letter]++;
             if (counts[letter] == 3) {
-                common_letter = letter;
-                break;
+                return ConvertToPriority(letter);
             }
         }
     }
 
-    // Map the letter to priority numbers
-    if (islower(common_letter)) {
-        return (common_letter - 'a' + 1);
-    } else {
-        return (common_letter - 'A' + 27);
-    }
+    throw runtime_error("Could not find a common letter among the three lines");
 }
 
 int main(int argc, char* argv[]) {
