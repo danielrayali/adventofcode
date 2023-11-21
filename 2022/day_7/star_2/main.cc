@@ -6,6 +6,7 @@
 
 using namespace std;
 
+// AI generated!
 vector<string> SplitString(const string& str, char delimiter) {
     vector<string> tokens;
     size_t start = 0, end = 0;
