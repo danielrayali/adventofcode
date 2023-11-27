@@ -28,5 +28,12 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    int number = 1123123250;
+    left.Parse(number);
+    
+    cout << number << " is divisible by 5: " << left.IsDivisibleBy(5) << endl;
+    cout << number << " is divisible by 2: " << left.IsDivisibleBy(2) << endl;
+    cout << number << " is divisible by 3: " << left.IsDivisibleBy(3) << endl;
+
     return 0;
 }

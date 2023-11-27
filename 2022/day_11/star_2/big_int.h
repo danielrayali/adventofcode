@@ -11,6 +11,10 @@ class BigInt {
 public:
     BigInt() = default;
 
+    BigInt(const BigInt& lhs) {
+        digits_ = lhs.digits_;
+    }
+
     BigInt(const int input) {
         this->Parse(input);
     }
@@ -60,14 +64,25 @@ public:
 
     void Multiply(const BigInt& rhs) {
         std::vector<BigInt> products;
-        unsigned long long outter_factor = 1;
+        int factor = 0;
         for (int i = 0; i < rhs.digits_.size(); ++i) {
-            unsigned long long inner_factor = 1;
-            for (int j = 0; j < digits_.size(); ++j) {
-                products.emplace_back(digits_.at(j) * rhs.digits_.at(i) * inner_factor * outter_factor);
-                inner_factor *= 10;
+            products.push_back({});
+            for (int k = 0; k < factor; ++k) {
+                products.back().digits_.push_back(0);
             }
-            outter_factor *= 10;
+
+            int remainder = 0;
+            for (int j = 0; j < digits_.size(); ++j) {
+                const int sum = rhs.digits_.at(i) * digits_.at(j) + remainder;
+                products.back().digits_.push_back(GetLowerDigit(sum));
+                remainder = (sum > 9) ? (sum / 10) : 0;
+            }
+
+            if (remainder != 0) {
+                products.back().digits_.push_back(remainder);
+            }
+
+            factor++;
         }
 
         BigInt result;
@@ -76,6 +91,18 @@ public:
         }
 
         digits_ = std::move(result.digits_);
+    }
+
+    bool IsDivisibleBy(const int number) {
+        if (number == 2) {
+            return !(digits_[0] & 0x1);
+        }
+        if (number == 5) {
+            return (digits_[0] == 0 || digits_[0] == 5);
+        }
+
+        BigInt parsed(number);
+        return false;
     }
 
     std::string ToString() const {

@@ -3,6 +3,7 @@
 #include <vector>
 #include <list>
 #include <map>
+#include "big_int.h"
 
 using namespace std;
 
@@ -38,11 +39,11 @@ public:
         }
     }
 
-    void AddItem(const int item) {
-        items_.push_back(item);
+    void AddItem(BigInt&& item) {
+        items_.emplace_back(item);
     }
 
-    list<int> GetItems() const {
+    list<BigInt> GetItems() const {
         return items_;
     }
 
@@ -52,7 +53,7 @@ public:
 
 private:
     vector<Monkey> &monkeys_;
-    list<int> items_;
+    list<BigInt> items_;
     string op_lhs_;
     string op_rhs_;
     string op_op_;
@@ -63,24 +64,19 @@ private:
 
     void InspectFrontItem() {
         // Perform operation
-        const int item = items_.front();
-        const int lhs = (op_lhs_ == "old" ? item : atoi(op_lhs_.c_str()));
-        const int rhs = (op_rhs_ == "old" ? item : atoi(op_rhs_.c_str()));
-        int new_worry = 0;
+        BigInt lhs { (op_lhs_ == "old" ? items_.front() : atoi(op_lhs_.c_str())) };
+        BigInt rhs { (op_rhs_ == "old" ? items_.front() : atoi(op_rhs_.c_str())) };
         if (op_op_ == "*") {
-            new_worry = lhs * rhs;
+            lhs.Multiply(rhs);
         } else {
-            new_worry = lhs + rhs;
+            lhs.Add(rhs);
         }
 
-        // Add user worry relief
-        new_worry /= 3;
-
-        const bool test_result = ((new_worry % divisibility_test_parameter_) == 0.0f);
+        const bool test_result = lhs.IsDivisibleBy(divisibility_test_parameter_);
         if (test_result) {
-            monkeys_.at(pass_monkey_).AddItem(new_worry);
+            monkeys_.at(pass_monkey_).AddItem(std::move(lhs));
         } else {
-            monkeys_.at(fail_monkey_).AddItem(new_worry);
+            monkeys_.at(fail_monkey_).AddItem(std::move(lhs));
         }
 
         items_.erase(items_.begin());
@@ -141,10 +137,13 @@ int main(int argc, char* argv[]) {
         monkeys.emplace_back(monkeys, input);
     }
 
-    const int rounds = 20;
+    const int rounds = 10000;
     for (int i = 0; i < rounds; ++i) {
+        cout << "Round " << i << endl;
         for (int j = 0; j < monkeys.size(); ++j) {
+            cout << "  Monkey " << j << "..." << flush;
             monkeys.at(j).InspectItems();
+            cout << "done" << endl;
         }
     }
 
@@ -152,7 +151,7 @@ int main(int argc, char* argv[]) {
     for (const auto& monkey : monkeys) {
         cout << "Monkey " << count++ << ": ";
         for (const auto& item : monkey.GetItems()) {
-            cout << item << ", ";
+            cout << item.ToString() << ", ";
         }
         cout << endl;
     }
