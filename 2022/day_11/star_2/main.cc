@@ -3,7 +3,6 @@
 #include <vector>
 #include <list>
 #include <map>
-#include "big_int.h"
 
 using namespace std;
 
@@ -39,11 +38,11 @@ public:
         }
     }
 
-    void AddItem(BigInt&& item) {
-        items_.emplace_back(item);
+    void AddItem(const long long item) {
+        items_.push_back(item);
     }
 
-    list<BigInt> GetItems() const {
+    list<long long> GetItems() const {
         return items_;
     }
 
@@ -51,9 +50,17 @@ public:
         return items_inspected_;
     }
 
+    void SetMaxModule(const int modulo) {
+        modulo_ = modulo;
+    }
+
+    int GetDivTestParam() const {
+        return divisibility_test_parameter_;
+    }
+
 private:
     vector<Monkey> &monkeys_;
-    list<BigInt> items_;
+    list<long long> items_;
     string op_lhs_;
     string op_rhs_;
     string op_op_;
@@ -61,22 +68,28 @@ private:
     int pass_monkey_ = -1;
     int fail_monkey_ = -1;
     int items_inspected_ = 0;
+    int modulo_ = 0;
 
     void InspectFrontItem() {
         // Perform operation
-        BigInt lhs { (op_lhs_ == "old" ? items_.front() : atoi(op_lhs_.c_str())) };
-        BigInt rhs { (op_rhs_ == "old" ? items_.front() : atoi(op_rhs_.c_str())) };
+        const long long item = items_.front();
+        const long long lhs = (op_lhs_ == "old" ? item : atoi(op_lhs_.c_str()));
+        const long long rhs = (op_rhs_ == "old" ? item : atoi(op_rhs_.c_str()));
+        long long new_worry = 0;
         if (op_op_ == "*") {
-            lhs.Multiply(rhs);
+            new_worry = lhs * rhs;
         } else {
-            lhs.Add(rhs);
+            new_worry = lhs + rhs;
         }
 
-        const bool test_result = lhs.IsDivisibleBy(divisibility_test_parameter_);
+        // New worry relief
+        new_worry %= modulo_;
+
+        const bool test_result = ((new_worry % divisibility_test_parameter_) == 0.0f);
         if (test_result) {
-            monkeys_.at(pass_monkey_).AddItem(std::move(lhs));
+            monkeys_.at(pass_monkey_).AddItem(new_worry);
         } else {
-            monkeys_.at(fail_monkey_).AddItem(std::move(lhs));
+            monkeys_.at(fail_monkey_).AddItem(new_worry);
         }
 
         items_.erase(items_.begin());
@@ -136,14 +149,20 @@ int main(int argc, char* argv[]) {
         getline(input, line);
         monkeys.emplace_back(monkeys, input);
     }
+    
+    int modulo = 1;
+    for (auto monkey : monkeys) {
+        modulo *= monkey.GetDivTestParam();
+    }
+
+    for (auto& monkey : monkeys) {
+        monkey.SetMaxModule(modulo);
+    }
 
     const int rounds = 10000;
     for (int i = 0; i < rounds; ++i) {
-        cout << "Round " << i << endl;
         for (int j = 0; j < monkeys.size(); ++j) {
-            cout << "  Monkey " << j << "..." << flush;
             monkeys.at(j).InspectItems();
-            cout << "done" << endl;
         }
     }
 
@@ -151,7 +170,7 @@ int main(int argc, char* argv[]) {
     for (const auto& monkey : monkeys) {
         cout << "Monkey " << count++ << ": ";
         for (const auto& item : monkey.GetItems()) {
-            cout << item.ToString() << ", ";
+            cout << item << ", ";
         }
         cout << endl;
     }
@@ -165,11 +184,11 @@ int main(int argc, char* argv[]) {
     }
 
     auto iter = inspection_counts.rbegin();
-    int top = iter->first;
+    long long top = iter->first;
     cout << "The top two monkey counts are Monkey " << iter->second;
     cout << " (" << iter->first << " inspections)";
     iter++;
-    int second = iter->first;
+    long long second = iter->first;
     cout << " and Monkey " << iter->second;
     cout << " (" << iter->first << " inspections)" << endl;
     cout << "The monkey business level is " << top * second << endl;
